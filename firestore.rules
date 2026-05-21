@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() { return request.auth != null; }
+    function isSelf(uid)  { return isSignedIn() && request.auth.uid == uid; }
+
+    // Keep this list in sync with src/admins.js (ADMIN_EMAILS).
+    function isAdminEmail() {
+      return isSignedIn()
+        && request.auth.token.email_verified == true
+        && request.auth.token.email.lower() in [
+             'eliyahu.lev@gmail.com'
+           ];
+    }
+
+    function isAdmin() {
+      return isAdminEmail() || (
+        isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true
+      );
+    }
+
+    match /users/{uid} {
+      allow read:   if isSelf(uid) || isAdmin();
+      allow create: if isSelf(uid)
+                    && request.resource.data.isAdmin == false;
+      allow update: if (isSelf(uid)
+                       && request.resource.data.isAdmin == resource.data.isAdmin)
+                    || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /availability/{weekendId} {
+      allow read: if isSignedIn();
+
+      allow create: if isSignedIn()
+                    && request.resource.data.volunteers is list
+                    && request.resource.data.volunteers.hasOnly([request.auth.uid]);
+
+      allow update: if isSignedIn() && (
+        (request.resource.data.volunteers.hasAll(resource.data.volunteers)
+         && request.resource.data.volunteers.toSet()
+              .difference(resource.data.volunteers.toSet())
+            == [request.auth.uid].toSet())
+        ||
+        (resource.data.volunteers.hasAll(request.resource.data.volunteers)
+         && resource.data.volunteers.toSet()
+              .difference(request.resource.data.volunteers.toSet())
+            == [request.auth.uid].toSet())
+        ||
+        isAdmin()
+      );
+
+      allow delete: if isAdmin();
+    }
+  }
+}

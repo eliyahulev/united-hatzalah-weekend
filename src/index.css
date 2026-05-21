@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body, #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-hatzalah-gray-light text-hatzalah-charcoal font-sans antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button {
+    @apply select-none;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 font-semibold rounded-xl2 px-5 transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100;
+    min-height: 52px;
+  }
+  .btn-primary {
+    @apply btn bg-hatzalah-orange text-white shadow-cta hover:bg-hatzalah-orange-dark;
+  }
+  .btn-secondary {
+    @apply btn bg-white text-hatzalah-charcoal border border-black/10 hover:bg-hatzalah-gray-light;
+  }
+  .btn-dark {
+    @apply btn bg-hatzalah-charcoal text-white hover:bg-hatzalah-gray;
+  }
+  .card {
+    @apply bg-white rounded-xl2 shadow-card p-5;
+  }
+  .input {
+    @apply w-full bg-white border border-black/10 rounded-xl px-4 py-3 text-base text-hatzalah-charcoal placeholder:text-black/40 focus:outline-none focus:border-hatzalah-orange focus:ring-2 focus:ring-hatzalah-orange/20;
+    min-height: 52px;
+  }
+  .label {
+    @apply block text-sm font-semibold text-hatzalah-charcoal mb-2;
+  }
+}
+
+/* Safe-area padding for iOS notch */
+.safe-bottom { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+.safe-top    { padding-top:   max(1rem, env(safe-area-inset-top)); }
