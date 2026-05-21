@@ -8,11 +8,13 @@ import {
   formatHebrewDate,
   formatWeekendRange,
 } from '../utils/weekend';
+import { useShabbatInfo } from '../hooks/useShabbatInfo';
 
 export default function Dashboard({ profile, onEditProfile }) {
   const now = useMemo(() => new Date(), []);
   const weekendId = useMemo(() => getWeekendId(now), [now]);
   const { friday, saturday } = useMemo(() => getUpcomingWeekend(now), [now]);
+  const { hebrewDate, parasha } = useShabbatInfo();
 
   const [available, setAvailable] = useState(false);
   const [count, setCount] = useState(0);
@@ -65,10 +67,20 @@ export default function Dashboard({ profile, onEditProfile }) {
   return (
     <div className="max-w-screen-sm mx-auto px-4 py-5 safe-bottom">
       <div className="text-sm text-black/60 mb-1">{formatTodayLong(now)}</div>
+      {hebrewDate?.hebrew && (
+        <div className="text-sm text-hatzalah-orange font-semibold mb-1">{hebrewDate.hebrew}</div>
+      )}
       <h2 className="text-2xl font-extrabold text-hatzalah-charcoal">שלום {profile.name?.split(' ')[0]} 👋</h2>
 
       <section className="card mt-5">
-        <div className="text-sm text-black/60">סוף השבוע הקרוב</div>
+        <div className="flex items-baseline justify-between gap-3">
+          <div className="text-sm text-black/60">סוף השבוע הקרוב</div>
+          {parasha?.hebrew && (
+            <div className="text-xs font-bold text-hatzalah-orange bg-hatzalah-orange/10 rounded-full px-3 py-1">
+              {parasha.hebrew}
+            </div>
+          )}
+        </div>
         <div className="text-xl font-extrabold mt-1">{formatWeekendRange(friday, saturday)}</div>
         <div className="text-sm text-black/60 mt-1">
           שישי {formatHebrewDate(friday)} · שבת {formatHebrewDate(saturday)}

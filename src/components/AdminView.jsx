@@ -15,11 +15,13 @@ import {
   formatHebrewDate,
   formatWeekendRange,
 } from '../utils/weekend';
+import { useShabbatInfo } from '../hooks/useShabbatInfo';
 
 export default function AdminView() {
   const now = useMemo(() => new Date(), []);
   const weekendId = useMemo(() => getWeekendId(now), [now]);
   const { friday, saturday } = useMemo(() => getUpcomingWeekend(now), [now]);
+  const { hebrewDate, parasha } = useShabbatInfo();
 
   const [uids, setUids] = useState([]);
   const [volunteers, setVolunteers] = useState([]);
@@ -79,7 +81,8 @@ export default function AdminView() {
   }, [uids]);
 
   function buildShareText() {
-    const header = `*רשימת מתנדבים זמינים לסופ״ש*\n${formatWeekendRange(friday, saturday)}\nשישי ${formatHebrewDate(friday)} · שבת ${formatHebrewDate(saturday)}\nסה״כ: ${volunteers.length}\n`;
+    const parashaLine = parasha?.hebrew ? `${parasha.hebrew}\n` : '';
+    const header = `*רשימת מתנדבים זמינים לסופ״ש*\n${parashaLine}${formatWeekendRange(friday, saturday)}\nשישי ${formatHebrewDate(friday)} · שבת ${formatHebrewDate(saturday)}\nסה״כ: ${volunteers.length}\n`;
     if (volunteers.length === 0) {
       return `${header}\n_אין כרגע מתנדבים רשומים._`;
     }
@@ -119,9 +122,16 @@ export default function AdminView() {
   return (
     <div className="max-w-screen-sm mx-auto px-4 py-5 safe-bottom">
       <div className="card">
-        <div className="text-sm text-black/60">סיכום סופ״ש</div>
+        <div className="flex items-baseline justify-between gap-3">
+          <div className="text-sm text-black/60">סיכום סופ״ש</div>
+          {parasha?.hebrew && (
+            <div className="text-xs font-bold text-hatzalah-orange bg-hatzalah-orange/10 rounded-full px-3 py-1">
+              {parasha.hebrew}
+            </div>
+          )}
+        </div>
         <div className="text-xl font-extrabold mt-1">{formatWeekendRange(friday, saturday)}</div>
-        <div className="text-sm text-black/60 mt-1">מזהה: {weekendId}</div>
+        <div className="text-sm text-black/60 mt-1">{hebrewDate?.hebrew ?? `מזהה: ${weekendId}`}</div>
 
         <div className="mt-4 grid grid-cols-2 gap-3">
           <Stat label="זמינים" value={volunteers.length} />
