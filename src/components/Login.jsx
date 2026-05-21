@@ -23,9 +23,11 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-hatzalah-charcoal text-white flex flex-col">
       <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
-        <div className="w-20 h-20 rounded-3xl bg-hatzalah-orange flex items-center justify-center text-5xl font-extrabold mb-6 shadow-cta">
-          +
-        </div>
+        <img
+          src="/logo.png"
+          alt="איחוד הצלה"
+          className="w-28 h-28 mb-6 drop-shadow-[0_8px_24px_rgba(255,102,0,0.35)]"
+        />
         <h1 className="text-3xl font-extrabold mb-2">איחוד הצלה</h1>
         <p className="text-white/70 mb-8 leading-relaxed">
           רישום זמינות מתנדבים לסופי שבוע.
