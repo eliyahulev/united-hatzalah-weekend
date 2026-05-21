@@ -4,7 +4,8 @@
 //
 // Compared case-insensitively.
 export const ADMIN_EMAILS = [
-  'eliyahu.lev@gmail.com',
+  "eliyahu.lev@gmail.com",
+  "Akrichnetanel@gmail.com",
 ];
 
 export function isAdminEmail(email) {
