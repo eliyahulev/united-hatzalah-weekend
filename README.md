@@ -53,6 +53,55 @@ availability/{weekendId}     # weekendId = "weekend_YYYY_WW"
 
 מסמך הזמינות מזוהה לפי שבוע ISO של יום שישי הקרוב — כך שכל סופ״ש מקבל מסמך חדש אוטומטית.
 
+## פריסה אוטומטית (GitHub Actions → Firebase Hosting)
+
+ה-workflow ב-`.github/workflows/deploy.yml` בונה את האפליקציה ומפרסם אותה ל-Firebase Hosting בכל push ל-`main`. Pull Requests מקבלים Preview Channel זמני עם URL נפרד (מקושר אוטומטית לתגובה ב-PR).
+
+### הגדרה חד-פעמית
+
+**1. עדכנו את `.firebaserc`** עם ה-Project ID שלכם:
+
+```json
+{
+  "projects": { "default": "your-firebase-project-id" }
+}
+```
+
+**2. צרו Service Account** עם הרשאות פריסה:
+
+- ב-Firebase Console → ⚙️ Project settings → **Service accounts** → **Generate new private key** → הורידו את ה-JSON.
+- *(לחלופין, ה-CLI: `firebase init hosting:github` עושה את כל זה אוטומטית כולל הוספת ה-Secret)*
+
+**3. הגדירו GitHub Secrets** ב-`Settings → Secrets and variables → Actions`:
+
+| Secret | מקור |
+|---|---|
+| `FIREBASE_SERVICE_ACCOUNT` | תוכן ה-JSON של ה-Service Account (כולו) |
+| `VITE_FIREBASE_API_KEY` | מ-Firebase Console → Web app config |
+| `VITE_FIREBASE_AUTH_DOMAIN` | אותו דבר |
+| `VITE_FIREBASE_PROJECT_ID` | אותו דבר |
+| `VITE_FIREBASE_STORAGE_BUCKET` | אותו דבר |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | אותו דבר |
+| `VITE_FIREBASE_APP_ID` | אותו דבר |
+
+**4. הפעילו Firebase Hosting** בקונסולה: Build → **Hosting** → **Get started**.
+
+לאחר מכן, כל push ל-`main` יבנה ויפרוס אוטומטית ל-URL הציבורי `https://<project-id>.web.app`.
+
+### פריסת חוקי Firestore אוטומטית (אופציונלי)
+
+הוסיפו צעד נוסף ל-workflow אם רוצים גם פריסה אוטומטית של `firestore.rules`:
+
+```yaml
+      - name: Deploy Firestore rules
+        if: github.event_name == 'push'
+        run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/sa.json
+          GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json \
+            npx firebase-tools deploy --only firestore:rules \
+            --project ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+```
+
 ## הענקת הרשאות אדמין
 
 חוקי האבטחה לא מאפשרים למשתמש להגדיר את עצמו כאדמין. כדי להפוך מישהו לאדמין:
